@@ -12,6 +12,14 @@ import type { Project, ProjectStage } from "@/lib/types";
 
 const KEY = "appforge.projects";
 
+/** UUID that also works outside secure contexts (plain HTTP / old browsers). */
+function genId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function read(): Project[] {
   if (typeof window === "undefined") return [];
   try {
@@ -36,7 +44,7 @@ export function addLocalProject(input: {
   stage?: ProjectStage;
 }): Project {
   const project: Project = {
-    id: crypto.randomUUID(),
+    id: genId(),
     title: input.title,
     description: input.description,
     score: input.score,

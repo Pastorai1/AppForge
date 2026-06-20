@@ -4,7 +4,10 @@ import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/server";
 import { env, isStripeConfigured } from "@/lib/env";
 
-// Stripe needs the raw request body to verify the signature.
+// Stripe needs the raw request body to verify the signature, and the Node
+// runtime so the synchronous crypto path is available.
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   if (!isStripeConfigured() || !env.stripeWebhookSecret) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
@@ -20,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(
+    event = await stripe.webhooks.constructEventAsync(
       payload,
       signature,
       env.stripeWebhookSecret,

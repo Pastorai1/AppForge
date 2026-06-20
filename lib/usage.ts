@@ -69,14 +69,25 @@ export async function withQuota(
     );
   }
 
+  let data: unknown;
   try {
-    const data = await handler();
-    await recordGeneration(user.id);
-    const after = await getUsage(user.id);
-    return NextResponse.json({ data, usage: after });
+    data = await handler();
   } catch (err) {
     return handleError(err);
   }
+
+  // The generation already succeeded — record it and refresh usage, but never
+  // turn a successful generation into an error response if metering hiccups.
+  await recordGeneration(user.id);
+
+  let after = usage;
+  try {
+    after = await getUsage(user.id);
+  } catch (err) {
+    console.error("[AppForge] failed to refresh usage after generation", err);
+  }
+
+  return NextResponse.json({ data, usage: after });
 }
 
 function handleError(err: unknown): NextResponse {
@@ -125,5 +136,12 @@ export async function getUsage(userId: string): Promise<UsageState> {
 
 async function recordGeneration(userId: string): Promise<void> {
   const supabase = createClient()!;
-  await supabase.from("generations").insert({ user_id: userId });
+  const { error } = await supabase
+    .from("generations")
+    .insert({ user_id: userId });
+  if (error) {
+    // Surfacing this matters: a silently-failing insert would let a free user
+    // generate without ever consuming quota.
+    console.error("[AppForge] failed to record generation", error);
+  }
 }
