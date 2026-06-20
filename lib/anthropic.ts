@@ -41,13 +41,15 @@ export async function generateJSON<T>(opts: {
   schema: JsonSchema;
   maxTokens?: number;
   effort?: "low" | "medium" | "high" | "xhigh" | "max";
+  /** Override the model — e.g. a faster one for large, simple list generations. */
+  model?: string;
 }): Promise<T> {
   if (!isAnthropicConfigured()) {
     throw new AnthropicNotConfiguredError();
   }
 
   const response = await getClient().messages.create({
-    model: MODEL,
+    model: opts.model ?? MODEL,
     max_tokens: opts.maxTokens ?? 4096,
     system: opts.system,
     output_config: {
