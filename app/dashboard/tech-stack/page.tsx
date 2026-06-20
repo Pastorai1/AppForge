@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callAi } from "@/lib/api";
-import type { TechStackRecommendation } from "@/lib/types";
+import type { SavedTechStack, TechStackRecommendation } from "@/lib/types";
+import {
+  getTechStacks,
+  saveTechStack,
+  deleteTechStack,
+} from "@/lib/tech-stack-store";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 
 interface Question {
@@ -53,8 +58,17 @@ export default function TechStackPage() {
   const [result, setResult] = useState<TechStackRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [history, setHistory] = useState<SavedTechStack[]>([]);
 
   const allAnswered = QUESTIONS.every((q) => answers[q.key]);
+
+  useEffect(() => {
+    getTechStacks()
+      .then(setHistory)
+      .catch(() => {
+        /* non-fatal: history panel stays empty */
+      });
+  }, []);
 
   async function run() {
     setLoading(true);
@@ -65,10 +79,39 @@ export default function TechStackPage() {
         { answers },
       );
       setResult(data);
+
+      // Auto-save to history. Non-fatal: a save hiccup must not hide the result.
+      try {
+        const entry = await saveTechStack({
+          label: data.recommended?.name ?? "Recommendation",
+          recommendation: data,
+        });
+        setHistory((prev) => [entry, ...prev]);
+      } catch {
+        /* ignore — the result still displays */
+      }
     } catch (e) {
       setError(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function loadFromHistory(entry: SavedTechStack) {
+    setResult(entry.recommendation);
+    setError(null);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  async function removeFromHistory(id: string) {
+    const snapshot = history;
+    setHistory((prev) => prev.filter((t) => t.id !== id));
+    try {
+      await deleteTechStack(id);
+    } catch {
+      setHistory(snapshot);
     }
   }
 
@@ -110,6 +153,43 @@ export default function TechStackPage() {
           {loading ? "Thinking…" : "Recommend my stack"}
         </button>
       </div>
+
+      {history.length > 0 && (
+        <div className="card mb-6">
+          <h2 className="mb-3 text-sm font-semibold text-white">History</h2>
+          <div className="space-y-2">
+            {history.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
+              >
+                <button
+                  onClick={() => loadFromHistory(t)}
+                  className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+                  title="Open this recommendation"
+                >
+                  <span className="truncate text-sm font-medium text-gray-200 hover:text-primary">
+                    {t.label || "Recommendation"}
+                  </span>
+                  <span className="shrink-0 text-xs text-gray-500">
+                    {new Date(t.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </button>
+                <button
+                  onClick={() => removeFromHistory(t.id)}
+                  className="shrink-0 text-xs text-gray-500 hover:text-red-400"
+                  aria-label="Delete saved recommendation"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading && <Spinner label="Choosing the right stack…" />}
       {error ? <ErrorBanner error={error} /> : null}

@@ -111,6 +111,20 @@ export interface SavedMarketAnalysis {
   createdAt: string;
 }
 
+export interface SavedViabilityScore {
+  id: string;
+  idea: string;
+  score: ViabilityScore;
+  createdAt: string;
+}
+
+export interface SavedTechStack {
+  id: string;
+  label: string;
+  recommendation: TechStackRecommendation;
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;
