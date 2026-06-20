@@ -125,6 +125,20 @@ export interface SavedTechStack {
   createdAt: string;
 }
 
+export interface BuildMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface BuildSession {
+  id: string;
+  title: string;
+  referenceApp: string | null;
+  messages: BuildMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

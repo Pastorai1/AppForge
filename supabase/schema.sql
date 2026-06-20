@@ -160,3 +160,24 @@ create policy "Users manage their own tech stacks"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── Build sessions: conversational app-builder history ──
+create table if not exists public.build_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  title text not null default 'New build',
+  reference_app text,
+  messages jsonb not null default '[]',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists build_sessions_user_idx
+  on public.build_sessions (user_id, updated_at desc);
+
+alter table public.build_sessions enable row level security;
+
+create policy "Users manage their own build sessions"
+  on public.build_sessions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
