@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callAi } from "@/lib/api";
 import { CATEGORIES } from "@/lib/types";
-import type { MarketAnalysis } from "@/lib/types";
+import type { MarketAnalysis, SavedMarketAnalysis } from "@/lib/types";
+import {
+  getMarketAnalyses,
+  saveMarketAnalysis,
+  deleteMarketAnalysis,
+} from "@/lib/market-store";
+import { isSupabaseConfigured } from "@/lib/env";
 import { PageHeader, Spinner, ErrorBanner, ScoreBar } from "@/components/ui";
 
 export default function MarketAnalysisPage() {
@@ -11,6 +17,17 @@ export default function MarketAnalysisPage() {
   const [result, setResult] = useState<MarketAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+
+  const [history, setHistory] = useState<SavedMarketAnalysis[]>([]);
+  const synced = isSupabaseConfigured();
+
+  useEffect(() => {
+    getMarketAnalyses()
+      .then(setHistory)
+      .catch(() => {
+        /* non-fatal: history panel just stays empty */
+      });
+  }, []);
 
   async function run() {
     setLoading(true);
@@ -21,10 +38,35 @@ export default function MarketAnalysisPage() {
         { category },
       );
       setResult(data);
+
+      // Auto-save to history. Non-fatal: a save hiccup must not hide the result.
+      try {
+        const saved = await saveMarketAnalysis({ category, analysis: data });
+        setHistory((prev) => [saved, ...prev]);
+      } catch {
+        /* ignore — the analysis still displays */
+      }
     } catch (e) {
       setError(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function loadFromHistory(entry: SavedMarketAnalysis) {
+    setCategory(entry.category);
+    setResult(entry.analysis);
+    setError(null);
+  }
+
+  async function removeFromHistory(id: string) {
+    const snapshot = history;
+    setHistory((prev) => prev.filter((m) => m.id !== id));
+    try {
+      await deleteMarketAnalysis(id);
+    } catch (e) {
+      setError(e);
+      setHistory(snapshot);
     }
   }
 
@@ -54,6 +96,49 @@ export default function MarketAnalysisPage() {
           {loading ? "Analyzing…" : "Analyze market"}
         </button>
       </div>
+
+      {history.length > 0 && (
+        <div className="card mb-6">
+          <h2 className="mb-3 text-sm font-semibold text-white">History</h2>
+          <div className="space-y-2">
+            {history.map((m) => (
+              <div
+                key={m.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
+              >
+                <button
+                  onClick={() => loadFromHistory(m)}
+                  className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+                  title="Open this analysis"
+                >
+                  <span className="truncate text-sm font-medium text-gray-200 hover:text-primary">
+                    {m.category}
+                  </span>
+                  <span className="shrink-0 text-xs text-gray-500">
+                    {new Date(m.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                </button>
+                <button
+                  onClick={() => removeFromHistory(m.id)}
+                  className="shrink-0 text-xs text-gray-500 hover:text-red-400"
+                  aria-label="Delete saved analysis"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-gray-500">
+            {synced
+              ? "Saved to your account — revisit any analysis anytime."
+              : "Saved in your browser (connect Supabase to sync across devices)."}
+          </p>
+        </div>
+      )}
 
       {loading && <Spinner label="Analyzing market…" />}
       {error ? <ErrorBanner error={error} /> : null}

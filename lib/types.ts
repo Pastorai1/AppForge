@@ -104,6 +104,13 @@ export interface SavedListing {
   createdAt: string;
 }
 
+export interface SavedMarketAnalysis {
+  id: string;
+  category: string;
+  analysis: MarketAnalysis;
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;
