@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callAi } from "@/lib/api";
-import type { ViabilityScore } from "@/lib/types";
+import type { SavedViabilityScore, ViabilityScore } from "@/lib/types";
 import { addProject } from "@/lib/projects-store";
+import {
+  getViabilityScores,
+  saveViabilityScore,
+  deleteViabilityScore,
+} from "@/lib/viability-store";
 import { PageHeader, Spinner, ErrorBanner, ScoreBar } from "@/components/ui";
 
 const STEPS: { key: string; label: string; placeholder: string }[] = [
@@ -51,9 +56,18 @@ export default function ViabilityPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
+  const [history, setHistory] = useState<SavedViabilityScore[]>([]);
 
   const current = STEPS[step];
   const isLast = step === STEPS.length - 1;
+
+  useEffect(() => {
+    getViabilityScores()
+      .then(setHistory)
+      .catch(() => {
+        /* non-fatal: history panel stays empty */
+      });
+  }, []);
 
   function update(value: string) {
     setAnswers((a) => ({ ...a, [current.key]: value }));
@@ -67,10 +81,38 @@ export default function ViabilityPage() {
         answers,
       });
       setResult(data);
+
+      // Auto-save to history. Non-fatal: a save hiccup must not hide the score.
+      try {
+        const entry = await saveViabilityScore({
+          idea: answers.idea?.slice(0, 120) ?? "",
+          score: data,
+        });
+        setHistory((prev) => [entry, ...prev]);
+      } catch {
+        /* ignore — the score still displays */
+      }
     } catch (e) {
       setError(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function loadFromHistory(entry: SavedViabilityScore) {
+    setResult(entry.score);
+    setAnswers({ idea: entry.idea });
+    setSaved(false);
+    setError(null);
+  }
+
+  async function removeFromHistory(id: string) {
+    const snapshot = history;
+    setHistory((prev) => prev.filter((v) => v.id !== id));
+    try {
+      await deleteViabilityScore(id);
+    } catch {
+      setHistory(snapshot);
     }
   }
 
@@ -198,6 +240,48 @@ export default function ViabilityPage() {
           </div>
         )}
       </div>
+
+      {history.length > 0 && (
+        <div className="card mt-6">
+          <h2 className="mb-3 text-sm font-semibold text-white">
+            Past scores
+          </h2>
+          <div className="space-y-2">
+            {history.map((v) => (
+              <div
+                key={v.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
+              >
+                <button
+                  onClick={() => loadFromHistory(v)}
+                  className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+                  title="Open this score"
+                >
+                  <span className="truncate text-sm font-medium text-gray-200 hover:text-primary">
+                    {v.idea || "Untitled idea"}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <span className="chip">{v.score.overall}/100</span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(v.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => removeFromHistory(v.id)}
+                  className="shrink-0 text-xs text-gray-500 hover:text-red-400"
+                  aria-label="Delete saved score"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
