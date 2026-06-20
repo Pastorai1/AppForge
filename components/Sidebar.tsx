@@ -105,11 +105,20 @@ export function Sidebar({
           {email ? (
             <>
               <div className="truncate text-xs text-gray-500">{email}</div>
-              <form action="/auth/signout" method="post" className="mt-2">
-                <button className="text-xs text-gray-400 hover:text-white">
-                  Sign out
-                </button>
-              </form>
+              <div className="mt-2 flex items-center gap-4">
+                <Link
+                  href="/dashboard/account"
+                  onClick={() => setOpen(false)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Account
+                </Link>
+                <form action="/auth/signout" method="post">
+                  <button className="text-xs text-gray-400 hover:text-white">
+                    Sign out
+                  </button>
+                </form>
+              </div>
             </>
           ) : (
             <Link
