@@ -102,3 +102,23 @@ create policy "Users manage their own listings"
   on public.listings for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- ── Market analysis history ──
+create table if not exists public.market_analyses (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  category text not null,
+  payload jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists market_analyses_user_idx
+  on public.market_analyses (user_id, created_at desc);
+
+alter table public.market_analyses enable row level security;
+
+create policy "Users manage their own market analyses"
+  on public.market_analyses for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
