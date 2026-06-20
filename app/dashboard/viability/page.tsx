@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { callAi } from "@/lib/api";
 import type { ViabilityScore } from "@/lib/types";
-import { addLocalProject } from "@/lib/projects-store";
+import { addProject } from "@/lib/projects-store";
 import { PageHeader, Spinner, ErrorBanner, ScoreBar } from "@/components/ui";
 
 const STEPS: { key: string; label: string; placeholder: string }[] = [
@@ -82,14 +82,20 @@ export default function ViabilityPage() {
     setSaved(false);
   }
 
-  function saveProject() {
-    if (!result) return;
-    addLocalProject({
-      title: answers.idea?.slice(0, 80) || "Untitled idea",
-      description: answers.problem || "",
-      score: result.overall,
-    });
-    setSaved(true);
+  async function saveProject() {
+    if (!result || saved) return;
+    try {
+      await addProject({
+        title: answers.idea?.slice(0, 80) || "Untitled idea",
+        description: answers.problem || "",
+        score: result.overall,
+      });
+      setSaved(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to save project.",
+      );
+    }
   }
 
   if (result) {

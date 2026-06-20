@@ -97,6 +97,13 @@ export interface StoreListing {
   };
 }
 
+export interface SavedListing {
+  id: string;
+  appName: string;
+  listing: StoreListing;
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;
