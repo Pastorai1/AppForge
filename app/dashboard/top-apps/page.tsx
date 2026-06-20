@@ -18,14 +18,36 @@ export default function TopAppsPage() {
   async function load() {
     setLoading(true);
     setError(null);
+    setApps([]);
+
+    // Fetch in small, fast batches and append — far more reliable than one
+    // slow request, and the list fills in progressively (≈25 at a time → 100).
+    const collected: TopApp[] = [];
+    const seen = new Set<string>();
     try {
-      const { data } = await callAi<TopApp[]>("/api/ai/top-apps", {
-        category,
-        monetization,
-      });
-      setApps(data);
+      for (let batch = 0; batch < 4; batch++) {
+        const { data } = await callAi<TopApp[]>("/api/ai/top-apps", {
+          category,
+          monetization,
+          count: 25,
+          exclude: collected.map((a) => a.name),
+        });
+
+        let added = 0;
+        for (const app of data) {
+          const key = app.name.trim().toLowerCase();
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            collected.push(app);
+            added++;
+          }
+        }
+        setApps([...collected]);
+        if (added === 0) break; // model has no more distinct apps to add
+      }
     } catch (e) {
-      setError(e);
+      // Keep whatever we already loaded; only surface an error if we got nothing.
+      if (collected.length === 0) setError(e);
     } finally {
       setLoading(false);
     }
@@ -80,7 +102,18 @@ export default function TopAppsPage() {
         </button>
       </div>
 
-      {loading && <Spinner />}
+      {loading && (
+        <Spinner
+          label={
+            apps.length
+              ? `Loaded ${apps.length}… fetching more`
+              : "Generating…"
+          }
+        />
+      )}
+      {!loading && apps.length > 0 && (
+        <p className="mb-3 text-xs text-gray-500">{apps.length} apps</p>
+      )}
       {error ? <ErrorBanner error={error} /> : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
