@@ -40,6 +40,7 @@ export async function generateJSON<T>(opts: {
   prompt: string;
   schema: JsonSchema;
   maxTokens?: number;
+  effort?: "low" | "medium" | "high" | "xhigh" | "max";
 }): Promise<T> {
   if (!isAnthropicConfigured()) {
     throw new AnthropicNotConfiguredError();
@@ -50,6 +51,7 @@ export async function generateJSON<T>(opts: {
     max_tokens: opts.maxTokens ?? 4096,
     system: opts.system,
     output_config: {
+      ...(opts.effort ? { effort: opts.effort } : {}),
       format: {
         type: "json_schema",
         schema: opts.schema,
@@ -68,6 +70,37 @@ export async function generateJSON<T>(opts: {
   }
 
   return JSON.parse(text.text) as T;
+}
+
+/**
+ * Multi-turn chat completion. Sends the full message history and returns the
+ * assistant's reply text. Used by the conversational app builder.
+ */
+export async function generateChat(opts: {
+  system: string;
+  messages: { role: "user" | "assistant"; content: string }[];
+  maxTokens?: number;
+}): Promise<string> {
+  if (!isAnthropicConfigured()) {
+    throw new AnthropicNotConfiguredError();
+  }
+
+  const response = await getClient().messages.create({
+    model: MODEL,
+    max_tokens: opts.maxTokens ?? 2048,
+    system: opts.system,
+    messages: opts.messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    })),
+  });
+
+  if (response.stop_reason === "refusal") {
+    throw new Error("The model declined to answer this request.");
+  }
+
+  const text = response.content.find((b) => b.type === "text");
+  return text && text.type === "text" ? text.text.trim() : "";
 }
 
 /**

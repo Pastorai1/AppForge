@@ -3,6 +3,9 @@ import { generateJSON } from "@/lib/anthropic";
 import { withQuota } from "@/lib/usage";
 import type { TopApp } from "@/lib/types";
 
+// A 100-item list takes longer than the default function budget — give it room.
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const category: string = body.category ?? "All";
@@ -22,8 +25,9 @@ export async function POST(req: NextRequest) {
     const result = await generateJSON<{ apps: TopApp[] }>({
       system:
         "You are a mobile app market analyst. You produce realistic, representative lists of top-grossing mobile apps with plausible revenue estimates. Be concrete and specific.",
-      prompt: `Produce a list of 12 top-grossing mobile apps. ${filterText} For each app give the name, its category, its primary monetization model, an estimated monthly revenue (e.g. "$4M-$6M"), and a one-line description of what it does.`,
-      maxTokens: 3000,
+      prompt: `Produce a ranked list of the top 100 top-grossing mobile apps, ordered from highest to lowest gross revenue. ${filterText} Return as many as you can up to 100, with no duplicates. For each app give the name, its category, its primary monetization model, an estimated monthly revenue (e.g. "$4M-$6M"), and a one-line description of what it does.`,
+      maxTokens: 12000,
+      effort: "low",
       schema: {
         type: "object",
         additionalProperties: false,

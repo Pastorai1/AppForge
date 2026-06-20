@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { callAi } from "@/lib/api";
 import { CATEGORIES, MONETIZATIONS } from "@/lib/types";
 import type { TopApp, AppAnalysis } from "@/lib/types";
@@ -84,21 +85,30 @@ export default function TopAppsPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {apps.map((app, i) => (
-          <button
-            key={`${app.name}-${i}`}
-            onClick={() => setSelected(app)}
-            className="card text-left hover:border-primary"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-white">{app.name}</h3>
-              <span className="chip">{app.estMonthlyRevenue}</span>
-            </div>
-            <p className="mt-2 text-sm text-gray-400">{app.oneLiner}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="chip">{app.category}</span>
-              <span className="chip">{app.monetization}</span>
-            </div>
-          </button>
+          <div key={`${app.name}-${i}`} className="card flex flex-col">
+            <button
+              onClick={() => setSelected(app)}
+              className="text-left hover:opacity-90"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-white">{app.name}</h3>
+                <span className="chip">{app.estMonthlyRevenue}</span>
+              </div>
+              <p className="mt-2 text-sm text-gray-400">{app.oneLiner}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="chip">{app.category}</span>
+                <span className="chip">{app.monetization}</span>
+              </div>
+            </button>
+            <Link
+              href={`/dashboard/build?ref=${encodeURIComponent(
+                app.name,
+              )}&desc=${encodeURIComponent(app.oneLiner)}`}
+              className="btn-ghost mt-3 text-center text-sm"
+            >
+              Build a better version →
+            </Link>
+          </div>
         ))}
       </div>
 

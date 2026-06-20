@@ -14,6 +14,7 @@ const NAV = [
   { href: "/dashboard/projects", label: "Projects" },
   { href: "/dashboard/store-listing", label: "Store Listing" },
   { href: "/dashboard/tech-stack", label: "Tech Stack" },
+  { href: "/dashboard/build", label: "Build" },
 ];
 
 export function Sidebar({
