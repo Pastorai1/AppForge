@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { callAi } from "@/lib/api";
-import type { StoreListing } from "@/lib/types";
+import type { SavedListing, StoreListing } from "@/lib/types";
+import {
+  getListings,
+  saveListing,
+  deleteListing,
+} from "@/lib/listings-store";
+import { isSupabaseConfigured } from "@/lib/env";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 
 type FieldKey =
@@ -32,9 +38,24 @@ export default function StoreListingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
+  const [saved, setSaved] = useState<SavedListing[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  const synced = isSupabaseConfigured();
+
+  useEffect(() => {
+    getListings()
+      .then(setSaved)
+      .catch(() => {
+        /* non-fatal: saved-listings panel just stays empty */
+      });
+  }, []);
+
   async function generate() {
     setLoading(true);
     setError(null);
+    setJustSaved(false);
     try {
       const { data } = await callAi<StoreListing>("/api/ai/store-listing", {
         appName,
@@ -46,6 +67,45 @@ export default function StoreListingPage() {
       setError(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function save() {
+    if (!listing || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const record = await saveListing({
+        appName: appName.trim() || "Untitled app",
+        listing,
+      });
+      setSaved((prev) => [record, ...prev]);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2000);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function load(record: SavedListing) {
+    setAppName(record.appName);
+    setListing(record.listing);
+    setError(null);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  async function remove(id: string) {
+    const snapshot = saved;
+    setSaved((prev) => prev.filter((l) => l.id !== id));
+    try {
+      await deleteListing(id);
+    } catch (e) {
+      setError(e);
+      setSaved(snapshot);
     }
   }
 
@@ -107,11 +167,57 @@ export default function StoreListingPage() {
         </div>
       </div>
 
+      {saved.length > 0 && (
+        <div className="card mb-6">
+          <h2 className="mb-3 text-sm font-semibold text-white">
+            Saved listings
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {saved.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5"
+              >
+                <button
+                  onClick={() => load(s)}
+                  className="text-sm text-gray-200 hover:text-primary"
+                  title="Load this listing"
+                >
+                  {s.appName || "Untitled app"}
+                </button>
+                <button
+                  onClick={() => remove(s.id)}
+                  className="text-xs text-gray-500 hover:text-red-400"
+                  aria-label="Delete saved listing"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading && <Spinner label="Writing your listings…" />}
       {error ? <ErrorBanner error={error} /> : null}
 
       {listing && (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              onClick={save}
+              disabled={saving}
+              className="btn-primary disabled:opacity-60"
+            >
+              {saving ? "Saving…" : justSaved ? "Saved ✓" : "Save listing"}
+            </button>
+            <span className="text-xs text-gray-500">
+              {synced
+                ? "Saved to your account."
+                : "Saved in your browser (connect Supabase to sync)."}
+            </span>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             <h2 className="font-semibold text-white">App Store</h2>
             <Field
@@ -181,7 +287,8 @@ export default function StoreListingPage() {
               onChange={(v) => setField("playStore", "fullDescription", v)}
             />
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
