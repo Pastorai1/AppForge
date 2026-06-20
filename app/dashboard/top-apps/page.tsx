@@ -7,25 +7,47 @@ import { CATEGORIES, MONETIZATIONS } from "@/lib/types";
 import type { TopApp, AppAnalysis } from "@/lib/types";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 
+const PER_CLICK = 50; // apps added per "generate" / "load more"
+// No hard cap — keep loading until the model runs out of distinct real apps.
+const MAX_TOTAL = Infinity;
+
 export default function TopAppsPage() {
   const [category, setCategory] = useState("All");
   const [monetization, setMonetization] = useState("All");
   const [apps, setApps] = useState<TopApp[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // initial generate
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [exhausted, setExhausted] = useState(false); // model has no more to add
   const [error, setError] = useState<unknown>(null);
   const [selected, setSelected] = useState<TopApp | null>(null);
 
-  async function load() {
-    setLoading(true);
+  /**
+   * Add up to PER_CLICK new apps, fetched in fast 25-item sub-batches so no
+   * single request is slow enough to time out. `reset` starts a fresh list.
+   */
+  async function fetchMore(reset: boolean) {
+    if (loading || loadingMore) return;
+    reset ? setLoading(true) : setLoadingMore(true);
     setError(null);
-    setApps([]);
+    if (reset) {
+      setApps([]);
+      setExhausted(false);
+    }
 
-    // Fetch in small, fast batches and append — far more reliable than one
-    // slow request, and the list fills in progressively (≈25 at a time → 100).
-    const collected: TopApp[] = [];
-    const seen = new Set<string>();
+    const collected: TopApp[] = reset ? [] : [...apps];
+    const seen = new Set(collected.map((a) => a.name.trim().toLowerCase()));
+    const startCount = collected.length;
+    let ranOut = false;
+
     try {
-      for (let batch = 0; batch < 4; batch++) {
+      // Up to 3 requests per click to net ~50, then stop even if short.
+      for (
+        let req = 0;
+        collected.length - startCount < PER_CLICK &&
+        collected.length < MAX_TOTAL &&
+        req < 3;
+        req++
+      ) {
         const { data } = await callAi<TopApp[]>("/api/ai/top-apps", {
           category,
           monetization,
@@ -43,13 +65,17 @@ export default function TopAppsPage() {
           }
         }
         setApps([...collected]);
-        if (added === 0) break; // model has no more distinct apps to add
+        if (added === 0) {
+          ranOut = true;
+          break;
+        }
       }
     } catch (e) {
-      // Keep whatever we already loaded; only surface an error if we got nothing.
-      if (collected.length === 0) setError(e);
+      // Keep what we have; only surface an error if this click added nothing.
+      if (collected.length === startCount) setError(e);
     } finally {
-      setLoading(false);
+      setExhausted(ranOut || collected.length >= MAX_TOTAL);
+      reset ? setLoading(false) : setLoadingMore(false);
     }
   }
 
@@ -97,12 +123,16 @@ export default function TopAppsPage() {
             ))}
           </div>
         </div>
-        <button onClick={load} disabled={loading} className="btn-primary">
+        <button
+          onClick={() => fetchMore(true)}
+          disabled={loading || loadingMore}
+          className="btn-primary"
+        >
           {loading ? "Generating…" : "Generate list"}
         </button>
       </div>
 
-      {loading && (
+      {(loading || loadingMore) && (
         <Spinner
           label={
             apps.length
@@ -111,7 +141,7 @@ export default function TopAppsPage() {
           }
         />
       )}
-      {!loading && apps.length > 0 && (
+      {!loading && !loadingMore && apps.length > 0 && (
         <p className="mb-3 text-xs text-gray-500">{apps.length} apps</p>
       )}
       {error ? <ErrorBanner error={error} /> : null}
@@ -144,6 +174,24 @@ export default function TopAppsPage() {
           </div>
         ))}
       </div>
+
+      {apps.length > 0 && !loading && (
+        <div className="mt-6 flex flex-col items-center gap-2">
+          {exhausted ? (
+            <p className="text-xs text-gray-500">
+              That&apos;s all the distinct apps we could find for this filter.
+            </p>
+          ) : (
+            <button
+              onClick={() => fetchMore(false)}
+              disabled={loadingMore}
+              className="btn-ghost"
+            >
+              {loadingMore ? "Loading…" : "Generate next 50"}
+            </button>
+          )}
+        </div>
+      )}
 
       {selected && (
         <AnalysisModal app={selected} onClose={() => setSelected(null)} />
