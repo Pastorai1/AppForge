@@ -11,6 +11,7 @@ import {
   deleteBuildSession,
 } from "@/lib/build-store";
 import { PageHeader, ErrorBanner } from "@/components/ui";
+import { GenerateAppPanel } from "@/components/GenerateAppPanel";
 
 const WELCOME: BuildMessage = {
   role: "assistant",
@@ -27,8 +28,17 @@ export default function BuildPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
+  const [showGenerate, setShowGenerate] = useState(false);
+
   const seededRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Has enough of a plan to generate code from (more than the welcome message).
+  const canGenerate = messages.filter((m) => m.role === "user").length > 0;
+  const buildPlan = () =>
+    messages
+      .map((m) => `${m.role === "user" ? "Founder" : "Coach"}: ${m.content}`)
+      .join("\n\n");
 
   useEffect(() => {
     void init();
@@ -272,6 +282,23 @@ export default function BuildPage() {
         <div className="flex h-[70vh] flex-col rounded-xl border border-border bg-surface/50">
           {activeId ? (
             <>
+              <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+                <span className="text-xs text-gray-500">
+                  Plan with the coach, then generate your app.
+                </span>
+                <button
+                  onClick={() => setShowGenerate(true)}
+                  disabled={!canGenerate || sending}
+                  className="btn-primary text-sm disabled:opacity-50"
+                  title={
+                    canGenerate
+                      ? "Generate a starter app from this plan"
+                      : "Chat with the coach first"
+                  }
+                >
+                  ⚙ Generate app code
+                </button>
+              </div>
               <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
                 {messages.map((m, i) => (
                   <div
@@ -341,6 +368,13 @@ export default function BuildPage() {
           )}
         </div>
       </div>
+
+      {showGenerate && (
+        <GenerateAppPanel
+          plan={buildPlan()}
+          onClose={() => setShowGenerate(false)}
+        />
+      )}
     </div>
   );
 }
