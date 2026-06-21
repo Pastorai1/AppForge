@@ -51,17 +51,51 @@ export default function BuildPage() {
       /* non-fatal */
     }
 
-    // Seed a new build from a Top-100 app, if linked here with ?ref=
+    // Seed a new build from a Top-100 app (?ref=) or an Opportunity (?idea=).
     if (typeof window !== "undefined" && !seededRef.current) {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get("ref");
+      const idea = params.get("idea");
+      const desc = params.get("desc") ?? "";
       if (ref) {
         seededRef.current = true;
-        const desc = params.get("desc") ?? "";
         window.history.replaceState({}, "", "/dashboard/build");
         await startFromReference(ref, desc);
         return;
       }
+      if (idea) {
+        seededRef.current = true;
+        window.history.replaceState({}, "", "/dashboard/build");
+        await startFromIdea(idea, desc);
+        return;
+      }
+    }
+  }
+
+  async function startFromIdea(idea: string, desc: string) {
+    const seed: BuildMessage = {
+      role: "user",
+      content: `I want to build this app idea: "${idea}"${
+        desc ? ` — ${desc}` : ""
+      }. Help me design and plan it, step by step toward launching it on the App Store and Google Play.`,
+    };
+    setError(null);
+    setReferenceApp(null);
+    setMessages([seed]);
+    setSending(true);
+    try {
+      const session = await createBuildSession({
+        title: idea.slice(0, 80),
+        referenceApp: null,
+        messages: [seed],
+      });
+      setActiveId(session.id);
+      setSessions((prev) => [session, ...prev]);
+      await getReply(session.id, null, [seed]);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setSending(false);
     }
   }
 

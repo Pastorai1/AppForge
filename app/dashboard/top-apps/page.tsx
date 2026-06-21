@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { callAi } from "@/lib/api";
 import { CATEGORIES, MONETIZATIONS } from "@/lib/types";
-import type { TopApp, AppAnalysis } from "@/lib/types";
+import type { TopApp } from "@/lib/types";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
+import { AppAnalysisModal } from "@/components/AppAnalysisModal";
 
 const PER_CLICK = 50; // apps added per "generate" / "load more"
 // No hard cap — keep loading until the model runs out of distinct real apps.
@@ -194,7 +195,12 @@ export default function TopAppsPage() {
       )}
 
       {selected && (
-        <AnalysisModal app={selected} onClose={() => setSelected(null)} />
+        <AppAnalysisModal
+          name={selected.name}
+          oneLiner={selected.oneLiner}
+          category={selected.category}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
   );
@@ -217,101 +223,5 @@ function Chip({
     >
       {label}
     </button>
-  );
-}
-
-function AnalysisModal({
-  app,
-  onClose,
-}: {
-  app: TopApp;
-  onClose: () => void;
-}) {
-  const [analysis, setAnalysis] = useState<AppAnalysis | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<unknown>(null);
-
-  async function run() {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await callAi<AppAnalysis>("/api/ai/app-analysis", {
-        name: app.name,
-        oneLiner: app.oneLiner,
-        category: app.category,
-      });
-      setAnalysis(data);
-    } catch (e) {
-      setError(e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white">{app.name}</h2>
-            <p className="text-sm text-gray-400">{app.oneLiner}</p>
-          </div>
-          <button onClick={onClose} className="chip hover:border-primary">
-            Close
-          </button>
-        </div>
-
-        {!analysis && !loading && (
-          <button onClick={run} className="btn-primary mt-5">
-            Run AI analysis
-          </button>
-        )}
-
-        {loading && (
-          <div className="mt-5">
-            <Spinner label="Analyzing…" />
-          </div>
-        )}
-        {error ? (
-          <div className="mt-5">
-            <ErrorBanner error={error} />
-          </div>
-        ) : null}
-
-        {analysis && (
-          <div className="mt-5 space-y-5 text-sm">
-            <p className="text-gray-300">{analysis.summary}</p>
-            <Section title="Why it works" items={analysis.whyItWorks} />
-            <div>
-              <h4 className="font-semibold text-white">Monetization</h4>
-              <p className="mt-1 text-gray-400">
-                {analysis.monetizationBreakdown}
-              </p>
-            </div>
-            <Section title="Weaknesses" items={analysis.weaknesses} />
-            <Section title="Opportunities" items={analysis.opportunities} />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <h4 className="font-semibold text-white">{title}</h4>
-      <ul className="mt-1 list-disc space-y-1 pl-5 text-gray-400">
-        {items.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ul>
-    </div>
   );
 }

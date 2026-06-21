@@ -1,49 +1,40 @@
 # AppForge — Progress & Handoff
 
-_Last updated: 2026-06-20. Working branch: `claude/wonderful-fermi-ljkp56` (merged to `main` via PR #2)._
+_Working branch: `claude/wonderful-fermi-ljkp56` (ships to `main` via PRs; Vercel auto-deploys `main`)._
 
-This note captures exactly where we are so we can pick up cleanly next session.
+## ✅ Live and working (tryappforge.net)
 
-## ✅ Done
+- **Deployed** on Vercel at the custom domain **www.tryappforge.net** (Supabase + Anthropic wired; new `sb_publishable_`/`sb_secret_` keys).
+- **Auth:** email + password (primary) with magic-link fallback; **Account** page to set/change password.
+- **Owner account** (jameschambersmail@gmail.com) is **Pro / unlimited** generations (set via `profiles.plan = 'pro'`).
+- **All 6 tools** working, with saved **history/persistence** (Supabase + localStorage fallback):
+  - Projects (kanban), Store Listings, Market Analysis history, Viability Scorer history, Tech Stack history.
+- **Top Apps explorer:** loads **50 per click** in fast 25-item sub-batches (avoids Vercel timeouts), with a **"Generate next 50"** button, **uncapped** (stops when the model runs out of distinct real apps). Uses `claude-haiku-4-5` for speed.
+- **Build coach (Phase 1):** conversational AI builder at `/dashboard/build`. Every **Top Apps** card has **"Build a better version →"** that seeds a build session. Sessions saved in `build_sessions`. Coaches a non-technical founder from idea → plan → launch roadmap. Uses Opus 4.8.
 
-- **App is code-complete** for the core product (6 features) and builds clean (`tsc`, `lint`, `next build` all pass).
-- **Supabase persistence wired** for Projects and Store Listings (with localStorage fallback in demo mode). Profiles, generations metering, and billing tables already existed.
-- **Supabase libraries upgraded** (`@supabase/ssr` 0.12, `@supabase/supabase-js` 2.108) to support the new `sb_publishable_` / `sb_secret_` API key format.
-- **Database schema applied** — `supabase/schema.sql` was run successfully in the Supabase SQL Editor (tables: profiles, generations, projects, listings + RLS + auto-profile trigger).
-- **Deployed to Vercel** from `main`. Live at **https://app-forge-one.vercel.app** (landing page renders correctly).
-- **Vercel env vars set** (Production + Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable key), `ANTHROPIC_API_KEY` (real `sk-ant-…` key).
-- **GitHub default branch** changed to `main`.
+## Supabase tables (all created in the live project)
+`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions` — all with RLS. Full schema in `supabase/schema.sql`.
+> Note: re-running the whole schema errors on `create policy` (not idempotent) — harmless; the tables already exist.
 
-## 🔜 Resume here — finish the custom domain + login
+## 🎯 End goal
+AppForge should take a user from idea → a real app **published to the Apple App Store and Google Play**, as hands-off (zero-code) as possible, including **actually building the app**.
 
-We were mid-way through attaching the custom domain **tryappforge.net** (bought at GoDaddy).
-Canonical will be **www.tryappforge.net** (apex → www redirect was enabled in Vercel).
+## 🔜 Next step — Phase 2: generate the real app code
+The planning layer is done. Next is turning a completed Build-coach plan into an actual app:
+- **Phase 2 (next):** from a finished build plan, generate a real **Expo / React Native** codebase (one codebase → iOS + Android), viewable/downloadable in-app. This is the "actually build it" piece.
+- **Phase 3:** compile to installable apps via a cloud build (e.g., Expo EAS) — requires the user's **Apple Developer ($99/yr)** + **Google Play ($25)** accounts and API tokens.
+- **Phase 4:** submit + store review (we already generate the store listing).
 
-1. **Vercel → Settings → Domains:** finish adding `tryappforge.net` (apex→www redirect on). Vercel will show DNS records to add.
-2. **GoDaddy → Domain → DNS → Manage DNS:** add the records Vercel specifies. Typical Vercel values (confirm against what Vercel actually shows):
-   - Apex `@`: **A record → 76.76.21.21**
-   - `www`: **CNAME → cname.vercel-dns.com**
-   - Remove any conflicting GoDaddy "parked" A/CNAME records for `@` and `www`.
-3. Wait for Vercel to show **Valid Configuration** (DNS can take minutes–hours; HTTPS cert auto-issues).
-4. **Supabase → Authentication → URL Configuration:**
-   - **Site URL:** `https://www.tryappforge.net`
-   - **Redirect URLs (add all):**
-     - `https://www.tryappforge.net/auth/callback`
-     - `https://tryappforge.net/auth/callback`
-     - `https://app-forge-one.vercel.app/auth/callback` (keep for fallback testing)
-5. **Vercel → Settings → Environment Variables:** set `NEXT_PUBLIC_APP_URL=https://www.tryappforge.net`, then **redeploy** (needed for Stripe redirect URLs later; safe to set now).
-6. **Test:** visit the site → Sign in → magic link to jameschambersmail@gmail.com → confirm it lands in the dashboard. Then create a project, refresh, confirm it persists (proves live DB writes work). Generate + save a store listing too.
+When resuming: scope Phase 2 first (it's a bigger build — plan before coding). Consider where generated code is stored (e.g., a `generated_apps` table or per-build artifacts) and how the zero-code user receives it (download zip, or push to a GitHub repo we create).
 
-> Quick alternative if you want to verify login _before_ DNS propagates: set Supabase **Site URL** to `https://app-forge-one.vercel.app` and test on the vercel.app URL first, then switch Site URL to the custom domain once DNS is live.
+## Other open items (optional)
+- **Stripe billing** — so other users can subscribe to Pro; needs a Stripe account + keys (`STRIPE_*`, plus `SUPABASE_SERVICE_ROLE_KEY` for the webhook).
+- **Google sign-in** (optional) — configure Google provider in Supabase.
+- **Production email** — Supabase built-in email is rate-limited; add custom SMTP for real volume.
+- Optional: dedicated `is_admin` flag (currently using Pro plan for unlimited).
 
-## 📋 Still outstanding (future sessions)
-
-- **Stripe billing** — Pro plan ($9/mo) checkout + webhook. Needs a Stripe account/product, then env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRO_PRICE_ID`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` (the Supabase **secret** key) for the webhook's privileged writes.
-- **Google sign-in** (optional) — configure the Google provider in Supabase if wanted; email magic-link works without it.
-- **Production email** (optional) — Supabase's built-in email is rate-limited; add custom SMTP for real volume.
-
-## 🔑 Reference (no secrets stored here)
-
-- Supabase project ref: `taxwodafytenxzyekfcd` → URL `https://taxwodafytenxzyekfcd.supabase.co`
-- Publishable key (safe/public): `sb_publishable_J2eZVS-jiXSrRkx7GCUwuA_sg0J5ODs`
-- Secret keys (Anthropic `sk-ant-…`, Supabase `sb_secret_…`, Stripe) live only in Vercel env vars / the gitignored `.env.local` — never committed.
+## Reference (no secrets here)
+- Supabase project ref: `taxwodafytenxzyekfcd` → `https://taxwodafytenxzyekfcd.supabase.co`
+- Publishable key (public/safe): `sb_publishable_J2eZVS-jiXSrRkx7GCUwuA_sg0J5ODs`
+- Secrets (Anthropic `sk-ant-…`, Supabase secret, future Stripe) live only in Vercel env vars / gitignored `.env.local`.
+- Vercel project: `app-forge` (Hobby plan; function time limit is why Top Apps uses small batches).
