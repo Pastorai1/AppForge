@@ -181,3 +181,24 @@ create policy "Users manage their own build sessions"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── Saved items: bookmarked top apps / opportunities to revisit ──
+create table if not exists public.saved_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  kind text not null check (kind in ('top_app', 'opportunity')),
+  item_key text not null,
+  payload jsonb not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, kind, item_key)
+);
+
+create index if not exists saved_items_user_idx
+  on public.saved_items (user_id, kind, created_at desc);
+
+alter table public.saved_items enable row level security;
+
+create policy "Users manage their own saved items"
+  on public.saved_items for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+

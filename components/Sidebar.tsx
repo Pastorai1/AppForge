@@ -10,6 +10,7 @@ const NAV = [
   { href: "/dashboard", label: "Overview", exact: true },
   { href: "/dashboard/top-apps", label: "Top 100 Apps" },
   { href: "/dashboard/opportunities", label: "Opportunities" },
+  { href: "/dashboard/saved", label: "Saved" },
   { href: "/dashboard/market-analysis", label: "Market Analysis" },
   { href: "/dashboard/viability", label: "Viability Scorer" },
   { href: "/dashboard/projects", label: "Projects" },

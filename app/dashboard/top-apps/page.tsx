@@ -7,6 +7,8 @@ import { CATEGORIES, MONETIZATIONS } from "@/lib/types";
 import type { TopApp } from "@/lib/types";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 import { AppAnalysisModal } from "@/components/AppAnalysisModal";
+import { SaveButton } from "@/components/SaveButton";
+import { useSaved } from "@/lib/use-saved";
 
 const PER_CLICK = 50; // apps added per "generate" / "load more"
 // No hard cap — keep loading until the model runs out of distinct real apps.
@@ -21,6 +23,7 @@ export default function TopAppsPage() {
   const [exhausted, setExhausted] = useState(false); // model has no more to add
   const [error, setError] = useState<unknown>(null);
   const [selected, setSelected] = useState<TopApp | null>(null);
+  const saved = useSaved("top_app");
 
   /**
    * Add up to PER_CLICK new apps, fetched in fast 25-item sub-batches so no
@@ -164,14 +167,21 @@ export default function TopAppsPage() {
                 <span className="chip">{app.monetization}</span>
               </div>
             </button>
-            <Link
-              href={`/dashboard/build?ref=${encodeURIComponent(
-                app.name,
-              )}&desc=${encodeURIComponent(app.oneLiner)}`}
-              className="btn-ghost mt-3 text-center text-sm"
-            >
-              Build a better version →
-            </Link>
+            <div className="mt-3 flex items-center gap-2">
+              <SaveButton
+                saved={saved.isSaved(app.name)}
+                busy={saved.isBusy(app.name)}
+                onClick={() => saved.toggle(app.name, app)}
+              />
+              <Link
+                href={`/dashboard/build?ref=${encodeURIComponent(
+                  app.name,
+                )}&desc=${encodeURIComponent(app.oneLiner)}`}
+                className="btn-ghost flex-1 text-center text-sm"
+              >
+                Build a better version →
+              </Link>
+            </div>
           </div>
         ))}
       </div>
