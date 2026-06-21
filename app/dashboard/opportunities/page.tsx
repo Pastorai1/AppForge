@@ -7,6 +7,8 @@ import { CATEGORIES } from "@/lib/types";
 import type { AppOpportunity } from "@/lib/types";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 import { AppAnalysisModal } from "@/components/AppAnalysisModal";
+import { SaveButton } from "@/components/SaveButton";
+import { useSaved } from "@/lib/use-saved";
 
 const PER_CLICK = 50; // ideas added per "Find" / "load more"
 
@@ -18,6 +20,7 @@ export default function OpportunitiesPage() {
   const [exhausted, setExhausted] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [selected, setSelected] = useState<AppOpportunity | null>(null);
+  const saved = useSaved("opportunity");
 
   /**
    * Add up to PER_CLICK new ideas via fast 12-item sub-batches so no single
@@ -147,14 +150,21 @@ export default function OpportunitiesPage() {
                 <span className="chip">{op.category}</span>
               </div>
             </button>
-            <Link
-              href={`/dashboard/build?idea=${encodeURIComponent(
-                op.idea,
-              )}&desc=${encodeURIComponent(op.pitch)}`}
-              className="btn-ghost mt-3 text-center text-sm"
-            >
-              Build this →
-            </Link>
+            <div className="mt-3 flex items-center gap-2">
+              <SaveButton
+                saved={saved.isSaved(op.idea)}
+                busy={saved.isBusy(op.idea)}
+                onClick={() => saved.toggle(op.idea, op)}
+              />
+              <Link
+                href={`/dashboard/build?idea=${encodeURIComponent(
+                  op.idea,
+                )}&desc=${encodeURIComponent(op.pitch)}`}
+                className="btn-ghost flex-1 text-center text-sm"
+              >
+                Build this →
+              </Link>
+            </div>
           </div>
         ))}
       </div>

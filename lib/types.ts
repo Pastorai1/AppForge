@@ -58,6 +58,16 @@ export interface AppOpportunity {
   monetization: string;
 }
 
+export type SavedItemKind = "top_app" | "opportunity";
+
+export interface SavedItem {
+  id: string;
+  kind: SavedItemKind;
+  itemKey: string; // stable key (lowercased name/idea) used to toggle/dedupe
+  payload: TopApp | AppOpportunity;
+  createdAt: string;
+}
+
 export interface AppAnalysis {
   summary: string;
   whyItWorks: string[];
