@@ -48,6 +48,16 @@ export interface TopApp {
   oneLiner: string;
 }
 
+export interface AppOpportunity {
+  idea: string;
+  category: string;
+  pitch: string;
+  why: string; // why it fits the market
+  competition: string; // competition level + brief reason
+  opportunityScore: number; // 0-100
+  monetization: string;
+}
+
 export interface AppAnalysis {
   summary: string;
   whyItWorks: string[];
