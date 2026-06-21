@@ -60,6 +60,22 @@ export interface AppOpportunity {
 
 export type SavedItemKind = "top_app" | "opportunity";
 
+export interface BlueprintFile {
+  path: string;
+  purpose: string;
+}
+
+export interface AppBlueprint {
+  appName: string;
+  summary: string;
+  files: BlueprintFile[];
+}
+
+export interface GeneratedFile {
+  path: string;
+  content: string;
+}
+
 export interface SavedItem {
   id: string;
   kind: SavedItemKind;
