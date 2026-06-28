@@ -8,6 +8,9 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const category: string = body.category ?? "All";
+  // Optional: scope every idea to a specific app type (e.g. "Habit Tracker").
+  const appType: string =
+    typeof body.appType === "string" ? body.appType.trim() : "";
   // Small, fast batches; the client requests several and appends them.
   const count = Math.min(Math.max(Number(body.count) || 12, 1), 15);
   const exclude: string[] = Array.isArray(body.exclude)
@@ -15,10 +18,14 @@ export async function POST(req: NextRequest) {
     : [];
 
   return withQuota(async () => {
-    const focus =
-      category !== "All"
+    const focus = appType
+      ? `Every idea MUST be a "${appType}" app — give distinct angles, niches, or twists on a ${appType}.`
+      : category !== "All"
         ? `Focus on the "${category}" category.`
         : "Span a broad mix of categories.";
+    const intro = appType
+      ? `Recommend ${count} specific "${appType}" app ideas worth building — different niches/angles for a ${appType}`
+      : `Recommend ${count} specific mobile app ideas that are great opportunities to BUILD right now`;
     const excludeText = exclude.length
       ? ` Do NOT repeat any of these already-suggested ideas: ${exclude.join("; ")}.`
       : "";
@@ -26,7 +33,7 @@ export async function POST(req: NextRequest) {
     const result = await generateJSON<{ ideas: AppOpportunity[] }>({
       system:
         "You are a mobile app market strategist who finds underserved, buildable app opportunities. You weigh real market demand against current competition and favor ideas a small indie team could realistically build and monetize. Be specific and realistic — no vague or joke ideas.",
-      prompt: `Recommend ${count} specific mobile app ideas that are great opportunities to BUILD right now, chosen for strong market fit and beatable competition. ${focus}${excludeText} Keep every field SHORT: pitch ≤ 1 sentence; why ≤ 12 words; competition ≤ 10 words (e.g. "Low — few focused players"); monetization ≤ 8 words. Give a 0-100 opportunityScore (higher = better opportunity). Rank highest score first. Return ${count} distinct ideas.`,
+      prompt: `${intro}, chosen for strong market fit and beatable competition. ${focus}${excludeText} Keep every field SHORT: pitch ≤ 1 sentence; why ≤ 12 words; competition ≤ 10 words (e.g. "Low — few focused players"); monetization ≤ 8 words. Give a 0-100 opportunityScore (higher = better opportunity). Rank highest score first. Return ${count} distinct ideas.`,
       maxTokens: Math.min(400 + count * 120, 3000),
       // Haiku keeps each batch fast enough to avoid function timeouts.
       model: "claude-haiku-4-5",
