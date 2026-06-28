@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { callAi } from "@/lib/api";
 import { CATEGORIES } from "@/lib/types";
 import type { AppOpportunity } from "@/lib/types";
 import { PageHeader, Spinner, ErrorBanner } from "@/components/ui";
 import { AppAnalysisModal } from "@/components/AppAnalysisModal";
-import { SaveButton } from "@/components/SaveButton";
+import { OpportunityCard } from "@/components/OpportunityCard";
 import { useSaved } from "@/lib/use-saved";
 
 const PER_CLICK = 50; // ideas added per "Find" / "load more"
@@ -123,49 +122,14 @@ export default function OpportunitiesPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ideas.map((op, i) => (
-          <div key={`${op.idea}-${i}`} className="card flex flex-col">
-            <button
-              onClick={() => setSelected(op)}
-              className="text-left hover:opacity-90"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-white">{op.idea}</h3>
-                <span className="chip shrink-0">{op.opportunityScore}/100</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-400">{op.pitch}</p>
-              <div className="mt-3 space-y-1 text-xs text-gray-500">
-                <p>
-                  <span className="text-gray-400">Market fit:</span> {op.why}
-                </p>
-                <p>
-                  <span className="text-gray-400">Competition:</span>{" "}
-                  {op.competition}
-                </p>
-                <p>
-                  <span className="text-gray-400">Monetization:</span>{" "}
-                  {op.monetization}
-                </p>
-              </div>
-              <div className="mt-3">
-                <span className="chip">{op.category}</span>
-              </div>
-            </button>
-            <div className="mt-3 flex items-center gap-2">
-              <SaveButton
-                saved={saved.isSaved(op.idea)}
-                busy={saved.isBusy(op.idea)}
-                onClick={() => saved.toggle(op.idea, op)}
-              />
-              <Link
-                href={`/dashboard/build?idea=${encodeURIComponent(
-                  op.idea,
-                )}&desc=${encodeURIComponent(op.pitch)}`}
-                className="btn-ghost flex-1 text-center text-sm"
-              >
-                Build this →
-              </Link>
-            </div>
-          </div>
+          <OpportunityCard
+            key={`${op.idea}-${i}`}
+            op={op}
+            saved={saved.isSaved(op.idea)}
+            busy={saved.isBusy(op.idea)}
+            onToggleSave={() => saved.toggle(op.idea, op)}
+            onAnalyze={() => setSelected(op)}
+          />
         ))}
       </div>
 

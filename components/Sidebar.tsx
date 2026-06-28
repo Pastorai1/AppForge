@@ -9,6 +9,7 @@ import type { UsageState } from "@/lib/usage";
 const NAV = [
   { href: "/dashboard", label: "Overview", exact: true },
   { href: "/dashboard/top-apps", label: "Top 100 Apps" },
+  { href: "/dashboard/app-types", label: "App Types" },
   { href: "/dashboard/opportunities", label: "Opportunities" },
   { href: "/dashboard/saved", label: "Saved" },
   { href: "/dashboard/market-analysis", label: "Market Analysis" },
