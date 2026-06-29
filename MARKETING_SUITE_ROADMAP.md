@@ -67,6 +67,30 @@ Each session you return, say **"what's this week's marketing-suite step?"** and 
 
 ---
 
+## Build readiness assessment (can we build each now?)
+Confidence to ship a functional **v1** from screenshot descriptions + known public frameworks. ✅ = ready to build now · ⚠️ = buildable now but quality/fidelity is gated by an external data source or the user's materials.
+
+| Tool | Ready? | Honest caveat / what would level it up |
+|---|---|---|
+| Brain | ✅ | Pure build. Just decide what context categories to capture (business, offer, audience, voice, products, competitors). |
+| Chief of Staff | ✅ | Same pattern as the Build coach, grounded in the Brain. |
+| Attractive Character | ✅ | Know the framework (backstory, flaws, polarity, identity). |
+| One-to-Many Emails | ✅ | Know Soap Opera (5-email) + Seinfeld structures well. |
+| One-to-Many Social | ✅ | Content-calendar generator. |
+| One-to-Many Ads | ✅ | Hooks/headlines/body/creative generator. |
+| One-to-Many Presentations | ✅ | Perfect Webinar structure is well-documented; user's exact/updated framework materials would sharpen it (optional). |
+| Framework Extractor | ✅ | Interview → structure flow. |
+| FunnelScan AI | ⚠️ | Needs to **fetch the live funnel URL**. Works on fetchable HTML/text; JS-heavy or bot-blocked pages return little — v1 should let the user paste page content as a fallback. |
+| RevScan AI | ⚠️ | Like FunnelScan but across website + socials. Full "scan social in seconds" needs social-data APIs; v1 analyzes a fetched site + user-provided info. |
+| Dream 100 | ⚠️ | The hard one: accurate ranking by **real** audience size + engagement needs an influencer/social data source (API). Without it, results are AI-estimated (plausible, not live-accurate — same caveat as our Top Apps). The outreach **CRM** half is a pure build. |
+
+**Three things (optional) that would raise quality across the board:**
+1. **The user's business context** — offer, audience, voice, products. Not needed to *build* the tools (the **Brain** collects it at runtime), but it makes every tool's output dramatically better. → Reason to build the Brain first.
+2. **Russell's specific framework materials** (if the user has them) — exact Perfect Webinar / sequence templates push output from "good generic" to "faithful."
+3. **Data-source decisions** for FunnelScan / RevScan / Dream 100 — pick web-fetch-only v1 now, add a paid data API later for live accuracy.
+
+**Bottom line:** nothing is blocked. We can build a working v1 of all 11. The ✅ tools are fully ready; the ⚠️ three are buildable now with an honest "AI-estimated / fetch-limited" caveat until we wire a real data source.
+
 ## Notes
 - Reuse everything we already built: Supabase + RLS + localStorage-fallback stores, the fast-batch generation pattern (avoids Vercel timeouts), saved-history pattern, the dashboard/sidebar shell, auth.
 - This is separate from the **AppForge app-building** track (Top Apps, Build coach, code generation, Phase 3 store publishing). Both can progress; don't conflate them.
