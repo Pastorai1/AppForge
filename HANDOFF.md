@@ -35,6 +35,22 @@ When resuming Phase 3: scope it first (it's a big build). Likely shape: store th
 - Stripe billing (so others can subscribe to Pro): needs Stripe account + `STRIPE_*` env vars + `SUPABASE_SERVICE_ROLE_KEY` for the webhook.
 - Google sign-in; custom SMTP for production email; dedicated `is_admin` flag.
 
+## ⭐ Product vision / inspiration — Russell Brunson's "MarketingSecrets AI"
+The user wants AppForge to grow toward a suite like **MarketingSecrets.ai** (Russell Brunson). Use this as a north-star reference as we build "our version." What it has (seen 2026, marketingsecrets.ai/home/.../software):
+
+- **Your Chief of Staff** — a central AI assistant that ties everything together.
+- **Brain** — a central knowledge base about the user + their business (add facts, review what it knows, connect outside AI tools so every app starts with the SAME shared context). This shared-context "Brain" is the architectural centerpiece — all tools read from it.
+- **Attractive Character** — build attractive characters with multiple voice styles; train a coaching chatbot; reused across the writing apps.
+- **CREATE & BROADCAST** suite ("tools that create content and reach more people"), built on Russell Brunson's frameworks:
+  - **One-to-Many Presentations** — full webinar/VSL/challenge/sales-presentation scripts (Perfect Webinar framework).
+  - **One-to-Many Emails** — complete email sequences (Soap Opera, Seinfeld, welcome, follow-up, promo).
+  - **One-to-Many Social** — full content calendar: scripts, captions, hooks, posts for YouTube/IG/FB/TikTok from one input.
+  - **One-to-Many Ads** — high-converting ad copy at scale (headlines, hooks, body, creative concepts) per platform/funnel stage.
+  - **Framework Extractor** — interviews the user to name + design their signature framework to teach/sell.
+- Left nav also: Sprints, Software, Training & Courses, Community, Promoter, New Task, Projects, Tasks.
+
+**Key pattern to emulate:** a central **Brain (shared business context)** + a **Chief-of-Staff assistant** + a grid of focused **"one-to-many" generators**, each grounded in proven frameworks. AppForge already mirrors this shape loosely (a dashboard of AI tools); the big missing piece is the **shared "Brain"/context layer** every tool draws from, and a marketing/content-generation suite. Revisit how/whether to fold a marketing suite into AppForge vs a sibling product when the user is ready.
+
 ## Unrelated note
 The **ready-room / `Pastorai1/Sales-pilot`** build failure seen earlier is a SEPARATE project (incomplete "batch 1/2" scaffold). Not AppForge. Being handled in its own session; this repo's tooling can't access it.
 
