@@ -6,6 +6,7 @@ import type { BrainFact } from "@/lib/types";
 import {
   getBrainFacts,
   addBrainFact,
+  addBrainFacts,
   updateBrainFact,
   deleteBrainFact,
 } from "@/lib/brain-store";
@@ -30,6 +31,7 @@ export default function BrainPage() {
   const [category, setCategory] = useState<string>(BRAIN_CATEGORIES[0]);
   const [content, setContent] = useState("");
   const [adding, setAdding] = useState(false);
+  const [bulk, setBulk] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -41,9 +43,33 @@ export default function BrainPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // In bulk mode, each non-empty line becomes its own fact.
+  const bulkLines = content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
   async function add() {
+    if (adding) return;
+
+    if (bulk) {
+      if (!bulkLines.length) return;
+      setAdding(true);
+      setError(null);
+      try {
+        const added = await addBrainFacts(category, bulkLines);
+        setFacts((prev) => [...prev, ...added]);
+        setContent("");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to add.");
+      } finally {
+        setAdding(false);
+      }
+      return;
+    }
+
     const text = content.trim();
-    if (!text || adding) return;
+    if (!text) return;
     setAdding(true);
     setError(null);
     try {
@@ -94,6 +120,22 @@ export default function BrainPage() {
 
       {/* Add a fact */}
       <div className="card mb-6 space-y-3">
+        {/* Mode toggle */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setBulk(false)}
+            className={`chip ${!bulk ? "chip-active" : "hover:border-primary"}`}
+          >
+            Add one
+          </button>
+          <button
+            onClick={() => setBulk(true)}
+            className={`chip ${bulk ? "chip-active" : "hover:border-primary"}`}
+          >
+            Paste many
+          </button>
+        </div>
+
         <span className="label">Category</span>
         <div className="flex flex-wrap gap-2">
           {BRAIN_CATEGORIES.map((c) => (
@@ -111,20 +153,40 @@ export default function BrainPage() {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={PROMPTS[category] ?? "Add a fact…"}
-          rows={3}
+          placeholder={
+            bulk
+              ? "Paste your facts here — one per line. Each line becomes its own fact under the category above."
+              : PROMPTS[category] ?? "Add a fact…"
+          }
+          rows={bulk ? 8 : 3}
           className="input resize-none"
         />
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">
-            Tip: add several short, specific facts rather than one long note.
+            {bulk
+              ? `Each line becomes one fact under ${category}. ${
+                  bulkLines.length
+                    ? `${bulkLines.length} ${
+                        bulkLines.length === 1 ? "fact" : "facts"
+                      } ready.`
+                    : ""
+                }`
+              : "Tip: add several short, specific facts rather than one long note."}
           </span>
           <button
             onClick={add}
-            disabled={adding || !content.trim()}
+            disabled={
+              adding || (bulk ? bulkLines.length === 0 : !content.trim())
+            }
             className="btn-primary disabled:opacity-60"
           >
-            {adding ? "Adding…" : "Add to Brain"}
+            {adding
+              ? "Adding…"
+              : bulk
+                ? `Add ${bulkLines.length || ""} ${
+                    bulkLines.length === 1 ? "fact" : "facts"
+                  }`.replace(/\s+/g, " ").trim()
+                : "Add to Brain"}
           </button>
         </div>
       </div>
