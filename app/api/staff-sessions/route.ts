@@ -1,0 +1,97 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/env";
+import type { BuildMessage, StaffSession } from "@/lib/types";
+
+function toSession(row: {
+  id: string;
+  title: string;
+  messages: BuildMessage[];
+  created_at: string;
+  updated_at: string;
+}): StaffSession {
+  return {
+    id: row.id,
+    title: row.title,
+    messages: Array.isArray(row.messages) ? row.messages : [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+const COLUMNS = "id, title, messages, created_at, updated_at";
+
+/**
+ * GET /api/staff-sessions — list the signed-in user's Chief of Staff
+ * conversations, most-recently-updated first.
+ */
+export async function GET() {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Staff sessions require Supabase. Running in local mode." },
+      { status: 503 },
+    );
+  }
+
+  const supabase = createClient()!;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
+  const { data, error } = await supabase
+    .from("staff_sessions")
+    .select(COLUMNS)
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ data: (data ?? []).map(toSession) });
+}
+
+/**
+ * POST /api/staff-sessions — create a conversation.
+ * Body: { title?: string; messages?: BuildMessage[] }
+ */
+export async function POST(req: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Staff sessions require Supabase. Running in local mode." },
+      { status: 503 },
+    );
+  }
+
+  const supabase = createClient()!;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const title =
+    typeof body.title === "string" && body.title.trim()
+      ? body.title.trim().slice(0, 120)
+      : "New conversation";
+  const messages: BuildMessage[] = Array.isArray(body.messages)
+    ? body.messages
+    : [];
+
+  const { data, error } = await supabase
+    .from("staff_sessions")
+    .insert({ user_id: user.id, title, messages })
+    .select(COLUMNS)
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ data: toSession(data) }, { status: 201 });
+}

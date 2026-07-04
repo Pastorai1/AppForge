@@ -36,8 +36,8 @@ Left-nav areas: **Sprints**, **Software**, **Training & Courses**, **Community**
 Each milestone ≈ one focused work session ("week"). Pace is flexible. Status: ⬜ todo · 🔄 in progress · ✅ done.
 
 **Phase A — Foundation**
-- ⬜ **Wk 1 — Brain (v1):** schema + UI to add/review business facts (about you, offer, audience, voice, products). Tables + RLS, like our other features. Every later tool reads this context.
-- ⬜ **Wk 2 — Chief of Staff (v1):** a conversational assistant (like the Build coach) grounded in the Brain; can answer, plan, and point you to the right tool.
+- ✅ **Wk 1 — Brain (v1):** schema + UI to add/review business facts (about you, offer, audience, voice, products). Tables + RLS, like our other features. Every later tool reads this context. _(Live: `/dashboard/brain`, `brain_facts` table, `formatBrainContext()` grounds later tools.)_
+- ✅ **Wk 2 — Chief of Staff (v1):** account-wide conversational assistant grounded in the Brain; saved conversation threads. _(Live: `/dashboard/staff`, `staff_sessions` table, `/api/ai/staff` injects the Brain context into a Chief-of-Staff system prompt.)_
 - ⬜ **Wk 3 — Attractive Character:** create 1+ voice profiles (tone, story, style) stored in the Brain; later tools accept a "voice" to write in.
 
 **Phase B — Create & Broadcast (each reads Brain + chosen voice; reuse our fast-batch + history patterns)**
