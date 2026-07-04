@@ -195,6 +195,14 @@ export interface BuildSession {
   updatedAt: string;
 }
 
+export interface StaffSession {
+  id: string;
+  title: string;
+  messages: BuildMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

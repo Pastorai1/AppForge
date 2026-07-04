@@ -14,8 +14,14 @@ _Working branch: `claude/wonderful-fermi-ljkp56` (ships to `main` via PRs; Verce
 - **Build coach** — conversational planning; entry points: "Build a better version" (Top Apps), "Build this" (Opportunities/App Types).
 - **Phase 2 — ⚙ Generate app code** (WORKS): from a Build plan, generates a runnable **Expo (React Native + TS)** scaffold file-by-file, viewable in-app + **Download .zip**. Verified live: generated "CoupleStreak" (8 files, valid package.json).
 
+### Marketing Suite (Russell Brunson track — see `MARKETING_SUITE_ROADMAP.md`)
+- **Wk 1 — Brain** (`/dashboard/brain`, `brain_facts` table): shared business-context facts every marketing tool reads via `formatBrainContext()`.
+- **Wk 2 — Chief of Staff** (`/dashboard/staff`, `staff_sessions` table): account-wide (not per-project) AI partner grounded in the Brain; saved conversation threads. `/api/ai/staff` injects the Brain context into the system prompt.
+- Next up: **Wk 3 — Attractive Character** (voice profiles).
+
 ## Supabase tables (all created in the live project)
-`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
+`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
+> **Migration to run for this change:** the `staff_sessions` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
 > Phase 2 (code gen) added NO new tables.
 
 ## 🎯 End goal
