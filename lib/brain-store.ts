@@ -72,6 +72,35 @@ export async function addBrainFact(input: NewBrainFact): Promise<BrainFact> {
   });
 }
 
+/**
+ * Adds many facts at once under one category — one fact per entry.
+ * Used by the "Paste to Brain" bulk-add flow.
+ */
+export async function addBrainFacts(
+  category: string,
+  contents: string[],
+): Promise<BrainFact[]> {
+  const cleaned = contents.map((c) => c.trim()).filter(Boolean);
+  if (!cleaned.length) return [];
+
+  if (!serverEnabled()) {
+    const now = new Date().toISOString();
+    const facts: BrainFact[] = cleaned.map((content) => ({
+      id: genId(),
+      category: category || "Other",
+      content,
+      createdAt: now,
+    }));
+    write([...read(), ...facts]);
+    return facts;
+  }
+
+  return request<BrainFact[]>("/api/brain", {
+    method: "POST",
+    body: JSON.stringify({ category, contents: cleaned }),
+  });
+}
+
 export async function updateBrainFact(
   id: string,
   patch: { content?: string; category?: string },
