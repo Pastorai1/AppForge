@@ -202,3 +202,23 @@ create policy "Users manage their own saved items"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── Brain: shared business-context facts the marketing tools read from ──
+create table if not exists public.brain_facts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  category text not null default 'Other',
+  content text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists brain_facts_user_idx
+  on public.brain_facts (user_id, category, created_at);
+
+alter table public.brain_facts enable row level security;
+
+create policy "Users manage their own brain facts"
+  on public.brain_facts for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+

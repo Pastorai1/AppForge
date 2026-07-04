@@ -58,6 +58,26 @@ export interface AppOpportunity {
   monetization: string;
 }
 
+export const BRAIN_CATEGORIES = [
+  "Business",
+  "Offer & Products",
+  "Audience",
+  "Brand Voice",
+  "Story",
+  "Goals",
+  "Competitors",
+  "Other",
+] as const;
+
+export type BrainCategory = (typeof BRAIN_CATEGORIES)[number];
+
+export interface BrainFact {
+  id: string;
+  category: string;
+  content: string;
+  createdAt: string;
+}
+
 export type SavedItemKind = "top_app" | "opportunity";
 
 export interface BlueprintFile {
