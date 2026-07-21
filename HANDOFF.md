@@ -22,11 +22,12 @@ _Working branch: `claude/wonderful-fermi-ljkp56` (ships to `main` via PRs; Verce
 - **Wk 5 — One-to-Many Social** (`/dashboard/social`, `social_calendars` table): one theme + platforms (LinkedIn/Facebook/Instagram/YouTube/TikTok/X) + a voice → a multi-platform content calendar (hook/caption/hashtags/format per post), generated one platform at a time (`/api/ai/social`, fast-batch). Saved to history; copy each post. Platform specs in `lib/social-platforms.ts`.
 - **Wk 6 — One-to-Many Ads** (`/dashboard/ads`, `ad_sets` table): platforms (Meta/Google/YouTube/TikTok/LinkedIn) + funnel stage (awareness/consideration/conversion) + a voice → ad variations (hook/headline/primaryText/CTA/creativeConcept per ad), one platform at a time (`/api/ai/ads`, fast-batch). Saved to history; copy each ad. Platform + stage specs in `lib/ad-platforms.ts`.
 - **Wk 7 — One-to-Many Presentations** (`/dashboard/presentations`, `presentations` table): full Perfect Webinar script (Hook & Big Promise → Big Domino → Origin → 3 Secrets → Stack → Close) from an offer + voice, generated one section at a time with a running summary for coherence (`/api/ai/presentation`). Saved to history; copy per section or full script. Section specs in `lib/presentation-sections.ts`.
-- Next up: **Wk 8 — Framework Extractor** (interview → names + structures the user's signature framework). Then the diagnostic tools (FunnelScan / RevScan / Dream 100).
+- **Wk 8 — Framework Extractor** (`/dashboard/frameworks`, `frameworks` table): conversational interview (`/api/ai/framework/interview`) → distills a named, structured signature framework (name, tagline, promise, ordered steps, how to teach/sell) via `/api/ai/framework/extract`. Saved to history; copy. Grounded in Brain.
+- Next up: the diagnostic tools — **FunnelScan / RevScan / Dream 100** (⚠️ these have data-source caveats: they need to fetch live URLs / social data; v1s work with web-fetch + user-provided input).
 
 ## Supabase tables (all created in the live project)
-`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`, `email_sequences`, `social_calendars`, `ad_sets`, `presentations`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
-> **Migration to run for this change:** the `presentations` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
+`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`, `email_sequences`, `social_calendars`, `ad_sets`, `presentations`, `frameworks`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
+> **Migration to run for this change:** the `frameworks` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
 > Phase 2 (code gen) added NO new tables.
 
 ## 🎯 End goal
