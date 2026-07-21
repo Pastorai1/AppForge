@@ -262,3 +262,25 @@ create policy "Users manage their own characters"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── One-to-Many Email sequences (history) ──
+create table if not exists public.email_sequences (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  type text not null,
+  label text not null default '',
+  topic text not null default '',
+  character_name text not null default '',
+  payload jsonb not null default '[]',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists email_sequences_user_idx
+  on public.email_sequences (user_id, created_at desc);
+
+alter table public.email_sequences enable row level security;
+
+create policy "Users manage their own email sequences"
+  on public.email_sequences for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
