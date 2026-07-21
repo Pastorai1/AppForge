@@ -255,6 +255,25 @@ export interface SavedEmailSequence {
   createdAt: string;
 }
 
+/** One social post in a content calendar. */
+export interface SocialPost {
+  platform: string; // platform id, e.g. "linkedin"
+  hook: string; // scroll-stopping opening line
+  caption: string; // the full post/caption (or short-video script)
+  hashtags: string; // suggested hashtags ("" where not applicable)
+  format: string; // suggested format, e.g. "Text post", "Carousel", "Short video"
+}
+
+/** A saved one-to-many social content calendar (history). */
+export interface SavedSocialCalendar {
+  id: string;
+  topic: string;
+  characterName: string; // the voice used ("" if none)
+  platforms: string[]; // platform ids included
+  posts: SocialPost[];
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

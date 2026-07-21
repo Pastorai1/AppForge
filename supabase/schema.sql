@@ -284,3 +284,24 @@ create policy "Users manage their own email sequences"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── One-to-Many Social content calendars (history) ──
+create table if not exists public.social_calendars (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  topic text not null default '',
+  character_name text not null default '',
+  platforms jsonb not null default '[]',
+  payload jsonb not null default '[]',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists social_calendars_user_idx
+  on public.social_calendars (user_id, created_at desc);
+
+alter table public.social_calendars enable row level security;
+
+create policy "Users manage their own social calendars"
+  on public.social_calendars for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
