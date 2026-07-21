@@ -295,6 +295,22 @@ export interface SavedAdSet {
   createdAt: string;
 }
 
+/** One section of a presentation script. */
+export interface PresentationSection {
+  key: string; // stable section key
+  title: string; // human title of the section
+  content: string; // the script/talking points for this section
+}
+
+/** A saved one-to-many presentation (Perfect Webinar) script (history). */
+export interface SavedPresentation {
+  id: string;
+  topic: string; // the offer/transformation
+  characterName: string; // the voice used ("" if none)
+  sections: PresentationSection[];
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;
