@@ -203,6 +203,33 @@ export interface StaffSession {
   updatedAt: string;
 }
 
+/**
+ * A reusable brand-voice / "Attractive Character" profile. The one-to-many
+ * content tools (emails, social, ads) accept a character to write in-voice.
+ */
+export interface AttractiveCharacter {
+  id: string;
+  name: string; // label, e.g. "James — PastorAI voice"
+  identity: string; // who they are + the role/identity they embody
+  backstory: string; // origin story and why they do this
+  voice: string; // tone & style: how the writing should sound
+  audience: string; // who they speak to
+  signaturePhrases: string; // words/phrases/hooks to lean on
+  avoid: string; // words/claims/tactics to avoid
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The AI-draftable fields of an Attractive Character (everything but ids/timestamps). */
+export interface CharacterProfile {
+  identity: string;
+  backstory: string;
+  voice: string;
+  audience: string;
+  signaturePhrases: string;
+  avoid: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;
