@@ -274,6 +274,27 @@ export interface SavedSocialCalendar {
   createdAt: string;
 }
 
+/** One ad variation. */
+export interface AdVariation {
+  platform: string; // platform id, e.g. "meta"
+  hook: string; // scroll-stopping opener
+  headline: string; // short ad headline
+  primaryText: string; // main body copy
+  cta: string; // call-to-action phrase/button
+  creativeConcept: string; // the visual/creative idea
+}
+
+/** A saved one-to-many ad set (history). */
+export interface SavedAdSet {
+  id: string;
+  topic: string; // the offer being advertised
+  characterName: string; // the voice used ("" if none)
+  funnelStage: string; // funnel stage id
+  platforms: string[]; // platform ids included
+  ads: AdVariation[];
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

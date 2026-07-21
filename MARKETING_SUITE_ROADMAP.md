@@ -43,7 +43,7 @@ Each milestone ≈ one focused work session ("week"). Pace is flexible. Status: 
 **Phase B — Create & Broadcast (each reads Brain + chosen voice; reuse our fast-batch + history patterns)**
 - ✅ **Wk 4 — One-to-Many Emails:** pick a sequence type (Welcome, Soap Opera, Seinfeld, Promo, Re-engagement) + a voice + topic → generates the full sequence one email at a time, grounded in Brain + character; saved to history. _(Live: `/dashboard/emails`, `email_sequences` table, `/api/ai/email`, `lib/email-sequences.ts` specs.)_
 - ✅ **Wk 5 — One-to-Many Social:** one theme + platforms + voice → a multi-platform content calendar (hook/caption/hashtags/format per post), generated one platform at a time; saved to history. _(Live: `/dashboard/social`, `social_calendars` table, `/api/ai/social`, `lib/social-platforms.ts`.)_
-- ⬜ **Wk 6 — One-to-Many Ads:** generate headlines/hooks/body/creative per platform + funnel stage.
+- ✅ **Wk 6 — One-to-Many Ads:** generate hook/headline/body/CTA/creative per platform + funnel stage (awareness/consideration/conversion), one platform at a time; saved to history. _(Live: `/dashboard/ads`, `ad_sets` table, `/api/ai/ads`, `lib/ad-platforms.ts`.)_
 - ⬜ **Wk 7 — One-to-Many Presentations:** Perfect Webinar-structured script from offer/audience/story.
 - ⬜ **Wk 8 — Framework Extractor:** interview flow → names + structures the user's signature framework.
 
