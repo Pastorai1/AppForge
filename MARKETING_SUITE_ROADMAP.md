@@ -45,7 +45,7 @@ Each milestone ≈ one focused work session ("week"). Pace is flexible. Status: 
 - ✅ **Wk 5 — One-to-Many Social:** one theme + platforms + voice → a multi-platform content calendar (hook/caption/hashtags/format per post), generated one platform at a time; saved to history. _(Live: `/dashboard/social`, `social_calendars` table, `/api/ai/social`, `lib/social-platforms.ts`.)_
 - ✅ **Wk 6 — One-to-Many Ads:** generate hook/headline/body/CTA/creative per platform + funnel stage (awareness/consideration/conversion), one platform at a time; saved to history. _(Live: `/dashboard/ads`, `ad_sets` table, `/api/ai/ads`, `lib/ad-platforms.ts`.)_
 - ✅ **Wk 7 — One-to-Many Presentations:** full Perfect Webinar-structured script (Hook & Big Promise → Big Domino → Origin → 3 Secrets → Stack → Close), generated one section at a time with a running summary for coherence; saved to history. _(Live: `/dashboard/presentations`, `presentations` table, `/api/ai/presentation`, `lib/presentation-sections.ts`.)_
-- ⬜ **Wk 8 — Framework Extractor:** interview flow → names + structures the user's signature framework.
+- ✅ **Wk 8 — Framework Extractor:** conversational interview → distills a named, structured signature framework (name, tagline, promise, ordered steps, how to teach/sell it); saved to history. _(Live: `/dashboard/frameworks`, `frameworks` table, `/api/ai/framework/interview` + `/api/ai/framework/extract`.)_
 
 **Phase C — Side Hustle / Agency**
 - ⬜ **Wk 9 — FunnelScan AI:** funnel URL → AI audit + prioritized fix list. (Web-fetch the page; analyze.)

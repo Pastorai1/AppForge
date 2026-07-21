@@ -311,6 +311,29 @@ export interface SavedPresentation {
   createdAt: string;
 }
 
+/** One step of a signature framework. */
+export interface FrameworkStep {
+  name: string;
+  description: string;
+}
+
+/** A named, structured signature framework extracted from an interview. */
+export interface ExtractedFramework {
+  name: string; // the framework's name
+  tagline: string; // a short memorable line
+  promise: string; // the result it delivers
+  steps: FrameworkStep[]; // the ordered steps
+  teaching: string; // how to teach / package / sell it
+}
+
+/** A saved signature framework (history). */
+export interface SavedFramework {
+  id: string;
+  name: string;
+  framework: ExtractedFramework;
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

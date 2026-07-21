@@ -347,3 +347,22 @@ create policy "Users manage their own presentations"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ── Framework Extractor: named, structured signature frameworks (history) ──
+create table if not exists public.frameworks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  name text not null default '',
+  payload jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists frameworks_user_idx
+  on public.frameworks (user_id, created_at desc);
+
+alter table public.frameworks enable row level security;
+
+create policy "Users manage their own frameworks"
+  on public.frameworks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
