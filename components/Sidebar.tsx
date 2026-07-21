@@ -13,6 +13,7 @@ const NAV = [
   { href: "/dashboard/character", label: "Attractive Character" },
   { href: "/dashboard/emails", label: "One-to-Many Emails" },
   { href: "/dashboard/social", label: "One-to-Many Social" },
+  { href: "/dashboard/ads", label: "One-to-Many Ads" },
   { href: "/dashboard/top-apps", label: "Top 100 Apps" },
   { href: "/dashboard/app-types", label: "App Types" },
   { href: "/dashboard/opportunities", label: "Opportunities" },

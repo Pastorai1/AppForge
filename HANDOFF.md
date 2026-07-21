@@ -20,11 +20,12 @@ _Working branch: `claude/wonderful-fermi-ljkp56` (ships to `main` via PRs; Verce
 - **Wk 3 — Attractive Character** (`/dashboard/character`, `characters` table): reusable brand-voice profiles (identity, backstory, voice, audience, signature phrases, avoid). "✨ Draft from my Brain" (`/api/ai/character`) auto-fills from business context. `formatCharacterVoice()` is the helper the content tools use to write in-voice.
 - **Wk 4 — One-to-Many Emails** (`/dashboard/emails`, `email_sequences` table): pick a sequence type (Welcome, Soap Opera, Seinfeld, Promo, Re-engagement) + a voice + a topic → generates the full sequence one email at a time (`/api/ai/email`, fast-batch), grounded in Brain + character. Saved to history; copy each email. Sequence specs live in `lib/email-sequences.ts`.
 - **Wk 5 — One-to-Many Social** (`/dashboard/social`, `social_calendars` table): one theme + platforms (LinkedIn/Facebook/Instagram/YouTube/TikTok/X) + a voice → a multi-platform content calendar (hook/caption/hashtags/format per post), generated one platform at a time (`/api/ai/social`, fast-batch). Saved to history; copy each post. Platform specs in `lib/social-platforms.ts`.
-- Next up: **Wk 6 — One-to-Many Ads** (headlines/hooks/body/creative per platform + funnel stage).
+- **Wk 6 — One-to-Many Ads** (`/dashboard/ads`, `ad_sets` table): platforms (Meta/Google/YouTube/TikTok/LinkedIn) + funnel stage (awareness/consideration/conversion) + a voice → ad variations (hook/headline/primaryText/CTA/creativeConcept per ad), one platform at a time (`/api/ai/ads`, fast-batch). Saved to history; copy each ad. Platform + stage specs in `lib/ad-platforms.ts`.
+- Next up: **Wk 7 — One-to-Many Presentations** (Perfect Webinar-structured script from offer/audience/story).
 
 ## Supabase tables (all created in the live project)
-`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`, `email_sequences`, `social_calendars`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
-> **Migration to run for this change:** the `social_calendars` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
+`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`, `email_sequences`, `social_calendars`, `ad_sets`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
+> **Migration to run for this change:** the `ad_sets` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
 > Phase 2 (code gen) added NO new tables.
 
 ## 🎯 End goal
