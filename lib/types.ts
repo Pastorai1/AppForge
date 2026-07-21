@@ -230,6 +230,31 @@ export interface CharacterProfile {
   avoid: string;
 }
 
+export type EmailSequenceType =
+  | "welcome"
+  | "soap_opera"
+  | "seinfeld"
+  | "promo"
+  | "reengagement";
+
+/** One generated email in a sequence. */
+export interface GeneratedEmail {
+  purpose: string; // the role this email plays in the sequence
+  subject: string;
+  body: string;
+}
+
+/** A saved one-to-many email sequence (history). */
+export interface SavedEmailSequence {
+  id: string;
+  type: EmailSequenceType;
+  label: string; // human label of the sequence type
+  topic: string; // the offer/topic it was written for
+  characterName: string; // the voice used ("" if none)
+  emails: GeneratedEmail[];
+  createdAt: string;
+}
+
 export interface TechStackRecommendation {
   recommended: {
     name: string;

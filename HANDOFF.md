@@ -17,12 +17,13 @@ _Working branch: `claude/wonderful-fermi-ljkp56` (ships to `main` via PRs; Verce
 ### Marketing Suite (Russell Brunson track — see `MARKETING_SUITE_ROADMAP.md`)
 - **Wk 1 — Brain** (`/dashboard/brain`, `brain_facts` table): shared business-context facts every marketing tool reads via `formatBrainContext()`.
 - **Wk 2 — Chief of Staff** (`/dashboard/staff`, `staff_sessions` table): account-wide (not per-project) AI partner grounded in the Brain; saved conversation threads. `/api/ai/staff` injects the Brain context into the system prompt.
-- **Wk 3 — Attractive Character** (`/dashboard/character`, `characters` table): reusable brand-voice profiles (identity, backstory, voice, audience, signature phrases, avoid). "✨ Draft from my Brain" (`/api/ai/character`) auto-fills from business context. `formatCharacterVoice()` is the helper the coming content tools use to write in-voice.
-- Next up: **Wk 4 — One-to-Many Emails** (pick a sequence type → full sequence, grounded in Brain + chosen character).
+- **Wk 3 — Attractive Character** (`/dashboard/character`, `characters` table): reusable brand-voice profiles (identity, backstory, voice, audience, signature phrases, avoid). "✨ Draft from my Brain" (`/api/ai/character`) auto-fills from business context. `formatCharacterVoice()` is the helper the content tools use to write in-voice.
+- **Wk 4 — One-to-Many Emails** (`/dashboard/emails`, `email_sequences` table): pick a sequence type (Welcome, Soap Opera, Seinfeld, Promo, Re-engagement) + a voice + a topic → generates the full sequence one email at a time (`/api/ai/email`, fast-batch), grounded in Brain + character. Saved to history; copy each email. Sequence specs live in `lib/email-sequences.ts`.
+- Next up: **Wk 5 — One-to-Many Social** (one input → multi-platform content calendar).
 
 ## Supabase tables (all created in the live project)
-`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
-> **Migration to run for this change:** the `characters` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
+`profiles`, `generations`, `projects`, `listings`, `market_analyses`, `viability_scores`, `tech_stacks`, `build_sessions`, `saved_items`, `brain_facts`, `staff_sessions`, `characters`, `email_sequences`. All with RLS. Full schema in `supabase/schema.sql`. (Re-running the whole schema errors on `create policy` — harmless; tables already exist.)
+> **Migration to run for this change:** the `email_sequences` table block in `supabase/schema.sql` (safe to run alone; uses `create table if not exists`).
 > Phase 2 (code gen) added NO new tables.
 
 ## 🎯 End goal

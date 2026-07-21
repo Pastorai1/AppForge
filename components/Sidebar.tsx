@@ -11,6 +11,7 @@ const NAV = [
   { href: "/dashboard/brain", label: "Brain" },
   { href: "/dashboard/staff", label: "Chief of Staff" },
   { href: "/dashboard/character", label: "Attractive Character" },
+  { href: "/dashboard/emails", label: "One-to-Many Emails" },
   { href: "/dashboard/top-apps", label: "Top 100 Apps" },
   { href: "/dashboard/app-types", label: "App Types" },
   { href: "/dashboard/opportunities", label: "Opportunities" },
