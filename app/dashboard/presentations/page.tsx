@@ -249,7 +249,7 @@ export default function PresentationsPage() {
                   {copied === s.key ? "Copied ✓" : "Copy"}
                 </button>
               </div>
-              <p className="whitespace-pre-wrap text-sm text-gray-200">
+              <p className="whitespace-pre-wrap break-words text-sm text-gray-200">
                 {s.content}
               </p>
             </div>

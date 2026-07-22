@@ -271,10 +271,10 @@ export default function EmailsPage() {
                   {copied === i ? "Copied ✓" : "Copy"}
                 </button>
               </div>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-white break-words">
                 Subject: {e.subject}
               </p>
-              <p className="whitespace-pre-wrap text-sm text-gray-200">
+              <p className="whitespace-pre-wrap break-words text-sm text-gray-200">
                 {e.body}
               </p>
             </div>

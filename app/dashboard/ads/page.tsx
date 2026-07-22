@@ -314,7 +314,7 @@ export default function AdsPage() {
                 {g.items.map(({ a, i }) => (
                   <div key={i} className="card space-y-2">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">
+                      <p className="min-w-0 break-words text-sm font-semibold text-white">
                         {a.headline}
                       </p>
                       <button
@@ -325,9 +325,11 @@ export default function AdsPage() {
                       </button>
                     </div>
                     {a.hook && (
-                      <p className="text-sm italic text-gray-300">{a.hook}</p>
+                      <p className="text-sm italic text-gray-300 break-words">
+                        {a.hook}
+                      </p>
                     )}
-                    <p className="whitespace-pre-wrap text-sm text-gray-200">
+                    <p className="whitespace-pre-wrap break-words text-sm text-gray-200">
                       {a.primaryText}
                     </p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">

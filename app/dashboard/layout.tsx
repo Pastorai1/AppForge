@@ -24,7 +24,9 @@ export default async function DashboardLayout({
   return (
     <div className="md:flex">
       <Sidebar email={email} usage={usage} />
-      <main className="min-h-screen flex-1 px-5 py-6 md:px-8">{children}</main>
+      <main className="min-h-screen w-full min-w-0 flex-1 px-5 py-6 md:px-8">
+        {children}
+      </main>
     </div>
   );
 }

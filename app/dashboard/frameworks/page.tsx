@@ -192,10 +192,12 @@ export default function FrameworksPage() {
           <div className="space-y-2">
             {framework.steps.map((s, i) => (
               <div key={i} className="rounded-lg border border-border bg-surface p-3">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-white break-words">
                   {i + 1}. {s.name}
                 </p>
-                <p className="mt-1 text-sm text-gray-300">{s.description}</p>
+                <p className="mt-1 break-words text-sm text-gray-300">
+                  {s.description}
+                </p>
               </div>
             ))}
           </div>
