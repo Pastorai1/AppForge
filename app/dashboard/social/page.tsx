@@ -303,15 +303,17 @@ export default function SocialPage() {
                       </button>
                     </div>
                     {p.hook && (
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-sm font-semibold text-white break-words">
                         {p.hook}
                       </p>
                     )}
-                    <p className="whitespace-pre-wrap text-sm text-gray-200">
+                    <p className="whitespace-pre-wrap break-words text-sm text-gray-200">
                       {p.caption}
                     </p>
                     {p.hashtags && (
-                      <p className="text-xs text-primary">{p.hashtags}</p>
+                      <p className="text-xs text-primary break-words">
+                        {p.hashtags}
+                      </p>
                     )}
                   </div>
                 ))}
